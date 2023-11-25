@@ -1,0 +1,7 @@
+MyBot.class
+RBotV4.class
+GoodGuesser.class
+RBotRandom.class
+RBotRandom.class
+RBotRandom.class
+RBotRandom.class
