@@ -6,6 +6,7 @@ public class SandBot extends Bot
     HashMap<String, Piece> pieces; // Keyed off of guest name
     Board board;
     Piece me;
+    String pieceToMove;
     HashMap<String, Player> players; // Keyed off of player name
     String otherPlayerNames[];
     TextDisplay display;
@@ -212,10 +213,9 @@ public class SandBot extends Bot
         {
             if(cardAction.startsWith("move")) 
             {
-                String guest;
+                String guest = pieceToMove;
                 guest = guestNames[r.nextInt(guestNames.length)];
-                piece = pieces.get(guest);
-                //moves = getPossibleMoves(piece);
+                System.out.println("@SandBot: Moving our favorite " + guest + " piece");
                 actions += ":move," + guest + "," + r.nextInt(3) + "," + r.nextInt(4);
             }
             else if(cardAction.startsWith("viewDeck")) 
@@ -492,6 +492,9 @@ public class SandBot extends Bot
             if(!name.equals(guestName)) possibleGuests.add(name);
         }
         me = pieces.get(guestName);
+
+        int pieceIndex = new Random().nextInt(guestNames.length);
+        pieceToMove = guestNames[pieceIndex];
 
         players = new HashMap<String, Player>();
         for(String str: playerNames)
