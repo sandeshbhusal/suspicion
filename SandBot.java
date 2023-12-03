@@ -400,7 +400,31 @@ public class SandBot extends Bot
         return rval.substring(0,rval.length()-1);
     }
 
-    public void reportPlayerActions(String player, String d1, String d2, String cardPlayed, String board, String actions) {
+    public void reportPlayerActions(String player, String d1, String d2, String cardPlayed, String board, String actions)
+    {
+    }
+
+    public void reportPlayerActions(String player, String d1, String d2, String cardPlayed, String board[], String actions)
+    {
+        System.out.println("In here!");
+        if(player.equals(this.playerName)) return; // If player is me, return
+        // Check for a get action and use the info to update player knowledge
+        if(cardPlayed.split(":")[0].equals("get,") || cardPlayed.split(":")[1].equals("get,"))
+        {
+            int splitindex;
+            String[] split = actions.split(":");
+            String get;
+            if(split[3].indexOf("get")>=0) splitindex=3;
+            else splitindex=4;
+            get=split[splitindex];
+            String gem = get.split(",")[1];
+            // board[splitIndex+1] will have the state of the board when the gem was taken
+            if(board[splitindex]!=null) // This would indicate an error in the action
+            {
+                ArrayList<String> possibleGuests = getGuestsInRoomWithGem(board[splitindex],gem);
+                players.get(player).adjustKnowledge(possibleGuests);
+            }
+        }
     }
 
 
