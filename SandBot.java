@@ -361,7 +361,7 @@ public class SandBot extends Bot
                 // Tie broken by number of guests that can grab the gem (occlude information).
                 // i.e. if we have 1, 1, 2 gems, we can take either red or green gem,
                 // but we pick whichever gem can be picked by most players.
-                best_score = gemscore(current) + getGuestsInRoomWithGem(board, gem).size();
+                best_score = score;
                 best_gem = gem_index;
             }
 
@@ -406,7 +406,6 @@ public class SandBot extends Bot
 
     public void reportPlayerActions(String player, String d1, String d2, String cardPlayed, String board[], String actions)
     {
-        System.out.println("In here!");
         if(player.equals(this.playerName)) return; // If player is me, return
         // Check for a get action and use the info to update player knowledge
         if(cardPlayed.split(":")[0].equals("get,") || cardPlayed.split(":")[1].equals("get,"))

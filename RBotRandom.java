@@ -234,6 +234,7 @@ public class RBotRandom extends Bot
                 {
                     // Grab a random gem
                     gemToGrab = this.board.rooms[me.row][me.col].availableGems[r.nextInt(this.board.rooms[me.row][me.col].availableGems.length)];
+                    System.out.println("Selected gem to pick " + gemToGrab);
                     actions += ":get," + gemToGrab;
                 }
                 else 
@@ -363,8 +364,8 @@ public class RBotRandom extends Bot
 
     public RBotRandom(String playerName, String guestName, int numStartingGems, String gemLocations, String[] playerNames, String[] guestNames)
     {
-        // TODO: Print out the params.
         super(playerName, guestName, numStartingGems, gemLocations, playerNames, guestNames);
+        System.out.println(gemLocations);
         display = new TextDisplay(gemLocations);
         pieces = new HashMap<String, Piece>();
         ArrayList<String> possibleGuests = new ArrayList<String>();
