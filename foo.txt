@@ -1,2 +1,0 @@
-GoodGuesser.class
-RBotRandom.class
