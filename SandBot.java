@@ -355,7 +355,8 @@ public class SandBot extends Bot
             int gem_index = idFromGem(gem); 
 
             current[gem_index] += 1;
-            if (gemscore(current) > best_score) {
+            int score = gemscore(current) + getGuestsInRoomWithGem(board, gem).size();
+            if (score > best_score) {
                 // Score is given by the gem score
                 // Tie broken by number of guests that can grab the gem (occlude information).
                 // i.e. if we have 1, 1, 2 gems, we can take either red or green gem,
@@ -369,7 +370,7 @@ public class SandBot extends Bot
         }
 
         String rval = gemFromId(best_gem);
-        System.out.println(rval);
+        System.out.println("@SandBot: Selected gem to pick: " + rval);
         return rval;
     }
 
