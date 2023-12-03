@@ -1,5 +1,2 @@
+GoodGuesser.class
 RBotRandom.class
-RBotRandom.class
-RBotRandom.class
-RBotRandom.class
-RBotPy.class

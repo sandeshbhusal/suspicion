@@ -344,7 +344,7 @@ public class RBotRandom extends Bot
     }
 
 
-/* Modify this method to do something more intelligent. */
+    /* Modify this method to do something more intelligent. */
     public String reportGuesses()
     {
         String rval="";

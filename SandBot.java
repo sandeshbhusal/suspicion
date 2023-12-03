@@ -244,10 +244,76 @@ public class SandBot extends Bot
             else if(cardAction.startsWith("ask")) 
             {
                 // Ask a random player
-                actions += ":" + cardAction + otherPlayerNames[r.nextInt(otherPlayerNames.length)]; 
+                // actions += ":" + cardAction + otherPlayerNames[r.nextInt(otherPlayerNames.length)]; 
+
+                String guestName = cardAction.split(",")[1];
+                
+                String picked = pickPlayerToQuestion(guestName);
+                System.out.println("@SandBot: Playing the 'ask' card. Picked " + picked + " to ask about " + guestName);
+                actions += ":" + cardAction + picked;
             }
         }
         return actions;
+    }
+    
+    // Pick a player to answer the question if they have seen an "other" guest.
+    public String pickPlayerToQuestion(String otherGuest) {
+        System.out.println("@SandBot: ---------------- pick player to question ------------------");
+        // Make a list of viable players.
+        HashMap<String, ArrayList<Boolean>> possiblePlayerAnswers = new HashMap<String, ArrayList<Boolean>>();
+
+        for (String p: this.players.keySet()) {
+            ArrayList<String> possibleGuestNames = players.get(p).possibleGuestNames;
+            ArrayList<Boolean> canSeeGuest = new ArrayList<Boolean>();
+
+            for (String guest: possibleGuestNames){
+                Piece p1 = pieces.get(guest);
+                Piece other = pieces.get(otherGuest);
+                canSeeGuest.add(canSee(p1, other));
+            }
+            
+            possiblePlayerAnswers.put(p, canSeeGuest);
+        }
+
+        // calculate the entropy of each set - select the one with the highest entropy.
+        float highestEntropy = -10000;
+        String selectedPlayer = null;
+
+            // Print the possible values for the given keyset.
+            for (String player_name: possiblePlayerAnswers.keySet()) {
+                System.out.print("@SandBot: "+ player_name + " ");
+                for (boolean answer: possiblePlayerAnswers.get(player_name)) {
+                    System.out.print( " -> "+ answer);
+                }
+                System.out.println();
+            }
+            // --- End of Print section --- 
+
+        for (String p: possiblePlayerAnswers.keySet()) {
+            HashMap<Boolean, Integer> check = new HashMap<Boolean, Integer>();
+            int total = possiblePlayerAnswers.get(p).size();
+
+            for (boolean b: possiblePlayerAnswers.get(p)) {
+                int temp = check.get(b) == null ? 0 : check.get(b);
+                temp += 1;
+                check.put(b, temp);
+            }
+
+            float entropy = 0;
+            for (boolean b: check.keySet()) {
+                System.out.println("@SandBot: " + check.get(b) + "  " + total);
+                float probability = (float) check.get(b) / (float) total;
+                entropy -= probability * (Math.log(probability) / Math.log(2));
+            }
+            System.out.println("@SandBot: Entropy for " + p + " is " + entropy); 
+            if (entropy > highestEntropy) {
+                highestEntropy = entropy;
+                selectedPlayer = p;
+            }
+        }
+
+        System.out.println("@SandBot: Selected " + selectedPlayer + " to ask about " + otherGuest);
+        return selectedPlayer;
     }
 
     private int countGems(String gem)
