@@ -409,45 +409,32 @@ public class SandBot extends Bot
 
     public String bestGemToGet(String board)
     {
+        System.out.println("@SandBot: ---------------------- picking a gem to pick -------------------");
         int[] current = this.gemCounts.clone();
         // Get possible gems this player can take.
         String[] available = getPossibleGemsList();
-
-        // List of gems that will maximize the gem count.
-        int best_score = -10000;
-        int best_gem = 0;
-
+        int min_gem = 1000;
         for (String gem: available) {
-            int gem_index = idFromGem(gem); 
-
-            current[gem_index] += 1;
-            int score = gemscore(current) + getGuestsInRoomWithGem(board, gem).size();
-            if (score > best_score) {
-                // Score is given by the gem score
-                // Tie broken by number of guests that can grab the gem (occlude information).
-                // i.e. if we have 1, 1, 2 gems, we can take either red or green gem,
-                // but we pick whichever gem can be picked by most players.
-                best_score = score;
-                best_gem = gem_index;
-            }
-
-            // Restore.
-            current[gem_index] -= 1;
+            if (this.gemCounts[idFromGem(gem)] < min_gem) min_gem = this.gemCounts[idFromGem(gem)];
         }
 
-        String rval = gemFromId(best_gem);
-        System.out.println("@SandBot: Selected gem to pick: " + rval);
-        return rval;
+        // Get all gems which have min gem count.
+        int num_players = -100;
+        String selected_gem = null;
+        for (String gem: available) {
+            if (this.gemCounts[idFromGem(gem)] == min_gem) {
+                System.out.println("@SandBot: Option: "+ gem + " " + this.gemCounts[idFromGem(gem)] + " " + min_gem);
+                if (getGuestsInRoomWithGem(board, gem).size() >= num_players)  {
+                    num_players = getGuestsInRoomWithGem(board, gem).size();
+                    selected_gem = gem;
+                }
+            }
+        }
+        System.out.println("@SandBot: Selected: " + selected_gem);
+
+        return selected_gem;
     }
 
-    // Score of a gem combination.
-    int gemscore(int[] gems) {
-        int red = gems[Suspicion.RED];
-        int green = gems[Suspicion.GREEN];
-        int yellow = gems[Suspicion.YELLOW];
-        int min_gems = Math.min(Math.min(red, green), yellow);
-        return min_gems * 6 + (red - min_gems) + (green - min_gems) + (yellow - min_gems);
-    }
 
     public String reportGuesses()
     {
