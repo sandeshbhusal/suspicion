@@ -172,6 +172,10 @@ public class SandBot extends Bot
     private String[] getPossibleMoves(Piece p)
     {
         LinkedList<String> moves=new LinkedList<String>();
+        if (p == null) {
+            System.out.println("ERROR: Piece is null!");
+        }
+
         if(p.row > 0) moves.push((p.row-1) + "," + p.col);
         if(p.row < 2) moves.push((p.row+1) + "," + p.col);
         if(p.col > 0) moves.push((p.row) + "," + (p.col-1));
@@ -180,11 +184,81 @@ public class SandBot extends Bot
         return moves.toArray(new String[moves.size()]);
     }
 
+    public float simulate(ArrayList<String> cardActionsList) {
+        return 0.0F;
+    }
 
+    public String returnBestActions(ArrayList<ArrayList<String>> simulations) {
+        // Run the simulations and return the best scoring card's cardactions.
+        String actions = "";
+        return actions;
+    }
+
+    @Override
     public String getPlayerActions(String d1, String d2, String card1, String card2, String board) throws Suspicion.BadActionException
     {
         this.board = new Board(board, pieces, gemLocations);
         String actions = "";
+
+        String[] possibleMove1;
+        if (d1.equals("?")) {
+            possibleMove1 = guestNames.clone();
+        } else {
+            possibleMove1 = new String[] {d1};
+        }
+
+        String[] possibleMove2;
+        if (d2.equals("?")) {
+            possibleMove2 = guestNames.clone();
+        } else {
+            possibleMove2 = new String[] {d2};
+        }
+
+        System.out.println(Arrays.toString(possibleMove1));
+        System.out.println(Arrays.toString(possibleMove2));
+        String[] cards = new String[]{ card1, card2};
+
+        ArrayList<ArrayList<String>> simulations = new ArrayList<ArrayList<String>>();
+        for (String movepiece1: possibleMove1) {
+            for (String movepiece2: possibleMove2) {
+                System.out.println("1 " + movepiece1);
+                System.out.println("2" + movepiece2);
+                for (String move1: getPossibleMoves(pieces.get(movepiece1))) {
+                    for (String move2: getPossibleMoves(pieces.get(movepiece2))) {
+                        for (String card: cards) {
+                            ArrayList<String> simulActions = new ArrayList<String>();
+                            // Push the move piece action immediately
+                            simulActions.add("move," + movepiece1 + ","+move1);                            
+                            simulActions.add("move," + movepiece2 + ","+move2);                            
+
+                            // List of simulate-able actions.
+                            for (String cardAction: card.split(":")) {
+                                if (cardAction.startsWith("move")) {
+                                    // Bring our move piece to our column on a random row anywhere.
+                                    int row = r.nextInt(3);
+                                    int col = me.col;
+                                    simulActions.add("move,"+pieceToMove+row+","+col);
+
+                                } else if (cardAction.startsWith("viewDeck")) {
+                                    simulActions.add("viewDeck");
+
+                                } else if (cardAction.startsWith("get")) {
+                                    simulActions.add("get,"+bestGemToGet(board));
+                                    
+                                } else if (cardAction.startsWith("ask")) {
+                                    String guestName = cardAction.split(",")[1];
+                                    simulActions.add("ask," + guestName +"," + pickPlayerToQuestion(guestName));
+                                }
+                            }
+
+                            simulations.add(simulActions);
+                        }
+                    }
+                }
+            }
+        }
+
+        System.out.println("I have total " + simulations.size() + " simulations to run");
 
         // Random move for dice1
         if(d1.equals("?")) d1 = guestNames[r.nextInt(guestNames.length)];
@@ -357,6 +431,7 @@ public class SandBot extends Bot
     }
 
     
+    @Override
     public void answerAsk(String guest, String player, String board, boolean canSee)
     {
         Board b = new Board(board, pieces, gemLocations);
@@ -370,6 +445,7 @@ public class SandBot extends Bot
         players.get(player).adjustKnowledge(possibleGuests);
     }
 
+    @Override
     public void answerViewDeck(String player)
     {
         for(String k:players.keySet())
@@ -451,6 +527,7 @@ public class SandBot extends Bot
         }
     }
 
+    @Override
     public String reportGuesses()
     {
         ArrayList<ArrayList<String>> combinations = new ArrayList<>();
@@ -500,10 +577,12 @@ public class SandBot extends Bot
         return rval;
     }
 
+    @Override
     public void reportPlayerActions(String player, String d1, String d2, String cardPlayed, String board, String actions)
     {
     }
 
+    @Override
     public void reportPlayerActions(String player, String d1, String d2, String cardPlayed, String board[], String actions)
     {
         if(player.equals(this.playerName)) return; // If player is me, return
