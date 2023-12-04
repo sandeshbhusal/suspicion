@@ -442,9 +442,11 @@ public class SandBot extends Bot
         } else {
             ArrayList<String> possibleGuestNames = valid_values.get(slotId);
             for (String value: possibleGuestNames) {
-                currentCombination.add(value); // Add this option to the list.
-                gen_combinations(slotId + 1, currentCombination, valid_values, tableToFill);
-                currentCombination.remove(currentCombination.size() - 1);
+                if (!currentCombination.contains(value)) {
+                    currentCombination.add(value); // Add this option to the list.
+                    gen_combinations(slotId + 1, currentCombination, valid_values, tableToFill);
+                    currentCombination.remove(currentCombination.size() - 1);
+                }
             }
         }
     }
