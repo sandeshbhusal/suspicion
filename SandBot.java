@@ -435,22 +435,67 @@ public class SandBot extends Bot
         return selected_gem;
     }
 
+    public void gen_combinations(int slotId, ArrayList<String> currentCombination, ArrayList<ArrayList<String>> valid_values, ArrayList<ArrayList<String>> tableToFill) {
+        if (slotId >= valid_values.size()) {
+            ArrayList<String> add = new ArrayList<String>(currentCombination);
+            tableToFill.add(add);
+        } else {
+            ArrayList<String> possibleGuestNames = valid_values.get(slotId);
+            for (String value: possibleGuestNames) {
+                currentCombination.add(value); // Add this option to the list.
+                gen_combinations(slotId + 1, currentCombination, valid_values, tableToFill);
+                currentCombination.remove(currentCombination.size() - 1);
+            }
+        }
+    }
 
     public String reportGuesses()
     {
-        String rval="";
-        for(String k:players.keySet())
-        {
-            Player p = players.get(k);
-            rval += k;
-            Collections.shuffle(p.possibleGuestNames);
-            for(String g: p.possibleGuestNames)
-            {
-                rval += ","+g;
-            }
-            rval+=":";
+        ArrayList<ArrayList<String>> combinations = new ArrayList<>();
+        ArrayList<ArrayList<String>> valid_options = new ArrayList<>();
+
+        for (String player: players.keySet()){
+            ArrayList<String> inner = new ArrayList<String>(players.get(player).possibleGuestNames);
+            valid_options.add(inner);
         }
-        return rval.substring(0,rval.length()-1);
+
+        gen_combinations(0, new ArrayList<>(), valid_options, combinations);
+
+        HashMap<String, HashMap<String, Integer>> stats = new HashMap<>();
+        for (int playerId = 0; playerId < otherPlayerNames.length; playerId++) {
+            for (ArrayList<String> entry: combinations) {
+                String selected = entry.get(playerId);
+                HashMap<String, Integer> row = stats.get(otherPlayerNames[playerId]) == null ? new HashMap<String, Integer>() : stats.get(otherPlayerNames[playerId]);
+                int temp = row.getOrDefault(selected, 0);
+                temp += 1;
+                row.put(selected, temp);
+                stats.put(otherPlayerNames[playerId], row);
+            }
+        }
+
+        for (String entry: stats.keySet()) {
+            HashMap<String, Integer> row = stats.get(entry);
+            System.err.format("row: %s\n", row);
+        }
+
+        String rval = "";
+        for (int id = 0; id < otherPlayerNames.length; id++) {
+            String player = otherPlayerNames[id];
+            HashMap<String, Integer> possible = stats.get(player);
+            int max_value = -1000;
+            String selection = null;
+            for (String guest: possible.keySet()) {
+                if (possible.get(guest) > max_value) {
+                    max_value = possible.get(guest);
+                    selection = guest;
+                }
+            }
+            rval += player + "," + selection + ":";
+        }
+
+        rval = rval.substring(0, rval.length() - 1);
+        System.out.println("@SandBot: Guesses are: " + rval);
+        return rval;
     }
 
     public void reportPlayerActions(String player, String d1, String d2, String cardPlayed, String board, String actions)
